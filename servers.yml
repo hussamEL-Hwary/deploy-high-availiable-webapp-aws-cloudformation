@@ -3,6 +3,21 @@ Parameters:
         Description: An environment name that will be prefixed to resource names
         Type: String
 
+    StorageSize:
+      Description: Size of instance storage in GB
+      Type: String
+      Default: '10'
+
+    MinInstancesNumber:
+      Description: Number of min EC2 Instances
+      Type: String
+      Default: '4'
+
+    MaxInstancesNumber:
+      Description: Number of max EC2 Instances
+      Type: String
+      Default: '8'
+
 Resources:
 
   S3RoleToEC2:
@@ -85,7 +100,6 @@ Resources:
             cd /var/www/html
             echo "Demo Web Server Up and Running!" > index.html
       ImageId: ami-09d56f8956ab235b3
-      KeyName: udagram_keypair
       IamInstanceProfile: !Ref InstanceProfile
       SecurityGroups:
       - Ref: WebServerSecGroup
@@ -93,7 +107,7 @@ Resources:
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
-          VolumeSize: '10'
+          VolumeSize: !Ref StorageSize
 
   WebAppGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -103,8 +117,8 @@ Resources:
           !Sub "${EnvironmentName}-PRIV-NETS"
       LaunchConfigurationName:
         Ref: WebAppLaunchConfig
-      MinSize: '4'
-      MaxSize: '8'
+      MinSize: !Ref MinInstancesNumber
+      MaxSize: !Ref MaxInstancesNumber
       TargetGroupARNs:
       - Ref: WebAppTargetGroup
 
